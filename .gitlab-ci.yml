@@ -1,0 +1,68 @@
+image: python:3.8-buster
+
+stages:
+  - test
+
+variables:
+    PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+
+cache:
+  paths:
+    - .cache/pip
+    - .venv
+
+all_tests:
+  stage: test
+  script:
+    - pip install -r requirements.txt
+    - python3 runtests.py
+
+# PEP8 style conformance
+flake8:
+  stage: test
+  before_script:
+    - pip install virtualenv
+    - virtualenv -q .venv
+    - source .venv/bin/activate
+    - pip install flake8
+  script:
+    - flake8 .
+
+# general linter
+pylint:
+  stage: test
+  before_script:
+    - pip install virtualenv
+    - virtualenv -q .venv
+    - source .venv/bin/activate
+    - pip install -r requirements.txt
+    - pip install pylint pylint-django
+    - shopt -s globstar
+  script:
+    - pylint ./**/*.py
+  allow_failure: true
+
+# security linter
+bandit:
+  stage: test
+  before_script:
+    - pip install virtualenv
+    - virtualenv -q .venv
+    - source .venv/bin/activate
+    - pip install bandit
+  script:
+    - bandit -r .
+  allow_failure: false
+
+# type checker
+mypy:
+  stage: test
+  before_script:
+    - pip install virtualenv
+    - virtualenv -q .venv
+    - source .venv/bin/activate
+    - pip install -r requirements.txt
+    - pip install django-stubs
+  script:
+    - mypy .
+  allow_failure: true

@@ -1,0 +1,14 @@
+*.un~
+*~
+*.sqlite3
+*.pyc
+pip-selfcheck.json
+houses.json
+bin/
+lib/
+share/
+include/
+tools/diceware
+.coverage
+.mypy_cache
+.idea

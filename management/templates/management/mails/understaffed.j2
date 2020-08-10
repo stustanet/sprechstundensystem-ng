@@ -1,0 +1,13 @@
+Hallo zusammen,
+{% if appointment.admins.all.count == 0 %}
+
+die Sprechstunde morgen ({{ appointment.start_time }}) ist noch unbesetzt. Es wäre schön, wenn sich noch paar Leute finden würden, um die Sprechstunde zu übernehmen.
+
+{% else %}
+
+in der Sprechstunde morgen ({{ appointment.start_time }}) ist noch ein Platz frei. Es wäre schön, wenn sich noch jemand dafür findet.
+
+{% endif %}
+Grüße,
+
+{{ sender }}

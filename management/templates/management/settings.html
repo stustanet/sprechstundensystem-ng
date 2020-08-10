@@ -1,0 +1,44 @@
+{% extends "management/base.html" %}
+
+{% block content %}
+  <h2>Einstellungen</h2>
+  {% for setting in forms %}
+    <div class="card mb-4 shadow">
+      <div class="card-header">
+        <h5>{{ setting.verbose_name }}</h5>
+      </div>
+      <div class="card-body">
+        <form method="post" action="{% url "management:settings" %}">
+          {% csrf_token %}
+          {{ setting.form.name }}
+          <div class="form-group">
+            {% for field in setting.form.settings %}
+              <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                  <div class="input-group-text">
+                    <input {% if field.active %}checked="checked"{% endif %} name="active" type="radio"
+                           value="{{ field.pk }}">
+                  </div>
+                </div>
+
+                <input type="text" class="form-control" name="{{ field.pk }}" value="{{ field.value }}">
+
+                <div class="input-group-append">
+                  <button class="btn btn-danger" value="{{ field.pk }}" type="submit" name="delete"><i
+                      class="fa fa-trash"></i></button>
+                </div>
+              </div>
+            {% endfor %}
+
+            <div class="text-center">
+              <button class="btn btn-primary" type="submit" value="save" name="submit"><i class="fa fa-save"></i>
+              </button>
+              <button class="btn btn-success" type="submit" value="add" name="submit"><i class="fa fa-plus"></i>
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  {% endfor %}
+{% endblock %}

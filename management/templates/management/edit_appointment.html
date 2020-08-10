@@ -1,0 +1,178 @@
+{% extends "management/base.html" %}
+{% load static %}
+
+{% block content %}
+  <h3>Sprechstunde bearbeiten</h3>
+
+  <form action="{% url "management:edit_appointment" appointment.pk %}" method="post">
+    {% csrf_token %}
+    <fieldset>
+      <div class="form-group row">
+        <label for="id_start_date" class="col-sm-3 col-form-label">Datum</label>
+        <div class="col-sm-9">
+          <input id="id_start_date" class="form-control" type="date" name="{{ form.start_date.name }}"
+                 value="{{ form.start_datetime|date:"Y-m-d" }}">
+        </div>
+      </div>
+      <div class="form-group row">
+        <label for="id_start_time" class="col-sm-3 col-form-label">Startzeit</label>
+        <div class="col-sm-9">
+          <input id="id_start_time" class="form-control" type="time" name="{{ form.start_time.name }}"
+                 value="{{ form.start_datetime|time:"H:i" }}">
+        </div>
+      </div>
+      <div class="form-group row">
+        <label for="id_end_time" class="col-sm-3 col-form-label">Endzeit</label>
+        <div class="col-sm-9">
+          <input id="id_end_time" class="form-control" type="time" name="{{ form.end_time.name }}"
+                 value="{{ form.end_datetime|time:"H:i" }}">
+        </div>
+      </div>
+      <div id="admin-template" class="row mb-3 d-none">
+        <div class="col-sm-11">
+          <input class="form-control typeahead" type="text" autocomplete="off">
+          <input type="hidden">
+        </div>
+        <button class="col-sm-1 btn btn-danger delete-admin" type="button"><i class="fa fa-trash"></i></button>
+      </div>
+      <div class="form-group row">
+        <label class="col-sm-3 col-form-label">Admins</label>
+        <div class="col-sm-9 admins">
+          {% for admin in appointment.admins.all %}
+            <div class="row mb-3">
+              <div class="col-sm-11">
+                <input class="form-control typeahead" type="text" autocomplete="off" value="{{ admin.name }}">
+                <input type="hidden" name="admins" value="{{ admin.pk }}">
+              </div>
+              <button class="col-sm-1 btn btn-danger delete-admin" type="button"><i class="fa fa-trash"></i></button>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </fieldset>
+    <div class="row justify-content-end">
+      <div class="col-sm-9">
+        <button type="submit" class="btn btn-success">Speichern</button>
+        <button class="btn btn-danger">Löschen</button>
+        <a class="btn btn-outline-dark" href="{% url "management:index" %}">Abbrechen</a>
+      </div>
+    </div>
+  </form>
+{% endblock %}
+
+{% block footer_scripts %}
+  <script src="{% static "management/typeahead.js/typeahead.bundle.min.js" %}"
+          type="text/javascript"></script>
+  <script type="text/javascript">
+      const PERSONS_URL = "{% url "management:api_list_admins" %}"
+      $(function () {
+          const template = $('#admin-template');
+          const container = $('.admins');
+          let items = [];
+          let selected = [];
+          let map = {};
+
+          const removeFunction = function () {
+
+              const id = parseInt($(this).parent().find('input[type=hidden]').val(), 10);
+
+              if (!isNaN(id)) {
+                  const selectedId = selected.indexOf(id);
+
+                  selected.splice(selectedId, 1);
+              }
+
+              if ($(this).closest('div.row').is(':last-child')) return false;
+              $(this).closest('div.row').remove();
+
+          };
+
+          const __ = function (template) {
+              template = $(template);
+
+              if (typeof (template[0].__cache) !== 'undefined') return template[0].__cache;
+
+              const obj = {
+                  txt: template.find('.typeahead'),
+                  del: template.find('button.delete-admin'),
+                  hid: template.find('input[type=hidden]')
+              };
+
+              template[0].__cache = obj;
+
+              return obj;
+          }
+
+          const addTypeahead = function (elem) {
+              const curr = __(elem);
+
+              curr.txt.typeahead({
+                  minLength: 1,
+                  highlight: true,
+              }, {
+                  source: function (query, syncResults, asyncResults) {
+                      if (items.length === 0) {
+                          $.getJSON(PERSONS_URL, null, function (data) {
+                              items = [];
+                              map = {}
+
+                              $.each(data, function (key, val) {
+                                  map[val.name] = val;
+                                  items.push(val.name);
+                              });
+
+                              asyncResults(items);
+                          });
+
+                      } else {
+                          const q = query.toLowerCase();
+                          const filteredItems = items.filter((item) => item.toLowerCase().indexOf(q) > -1)
+                          syncResults(filteredItems);
+                      }
+                  },
+              });
+
+              curr.txt.bind('typeahead:select', function (event, suggestion) {
+                  curr.hid.val(map[suggestion].id);
+                  selected.push(map[suggestion].id);
+
+                  const nextField = curr.txt.closest('.row').next();
+
+                  if (nextField.length === 0) {
+                      addNewPersonField().focus();
+                  } else {
+                      __(nextField).txt.focus();
+                  }
+              });
+          };
+
+          const addNewPersonField = function () {
+
+              const personInput = template.clone(false);
+
+              __(personInput).del.click(removeFunction);
+              __(personInput).hid[0].name = 'admins';
+              personInput.removeAttr('id').removeClass('d-none').appendTo(container);
+
+              addTypeahead(personInput);
+
+              __(personInput).txt.focus();
+
+              return __(personInput).txt;
+          };
+
+          $('button[name=delete]').click(function () {
+              return window.confirm("Soll die Sprechstunde gelöscht werden?");
+          });
+
+          $('button.delete-admin').click(removeFunction);
+
+          $('.persons button.delete-admin').closest('.row').each(function (i, elem) {
+              addTypeahead(elem);
+              selected.push(__(elem).hid.val() * 1);
+          });
+
+          addNewPersonField();
+      });
+  </script>
+{% endblock %}

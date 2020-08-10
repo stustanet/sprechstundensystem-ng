@@ -1,0 +1,73 @@
+{% extends "management/base.html" %}
+
+{% block content %}
+  <h2>Sprechstundenplan <small>für {{ from_date|date:"F" }} - {{ to_date|date:"F" }}</small></h2>
+
+  <p>Unsere Sprechstunden finden während der Vorlesungszeit an der TUM, LMU und FH jeweils am Montag und Donnerstag
+    statt; sonst nur Donnerstags. Wenn du bei einer Sprechstunde helfen willst, schreibe einfach eine E-Mail an den
+    Vorstand! </p>
+
+  {% for month in plan %}
+    <h2>{{ month.date | date:"F" }}</h2>
+    <table class="table table-striped table-hover">
+      <thead>
+      <tr>
+        <th class="col-lg-3 col-md-4 col-sm-4">Datum</th>
+        <th class="col-lg-2 col-md-2 col-sm-3">Uhrzeit</th>
+        <th class="col-lg-7 col-md-6 col-sm-4">Personen</th>
+        {% if user.is_staff %}
+          <th class="col-sm-1"></th>
+        {% endif %}
+      </tr>
+      </thead>
+      <tbody>
+      {% for appointment in month.appointments %}
+        <tr {% if appointment.start_time < today %}class="text-muted"{% endif %}>
+          <td class="appointment-date">{{ appointment.start_time|date:"l, d. F Y" }}</td>
+          <td class="appointment-time">{{ appointment.start_time|date:"H" }}
+            <sup>{{ appointment.start_time|date:"i" }}</sup> - {{ appointment.end_time|date:"H" }}
+            <sup>{{ appointment.end_time|date:"i" }}</sup></td>
+          <td class="appointment-admins">
+            <div class="row">
+              {% for admin in appointment.admins.all %}
+                <div class="col-lg-4 col-md-5 col-sm-12">
+                  <span>{{ admin.name }}</span>
+                  {% if user.is_staff %}
+                    <a href="mailto:{{ admin.email }}"><i class="fa fa-envelope"></i></a>
+                  {% endif %}
+                </div>
+              {% endfor %}
+            </div>
+          </td>
+          {% if user.is_staff %}
+            <td class="admin">
+              <div class="text-right">
+                <a class="btn btn-outline-info" href="{% url "management:edit_appointment" appointment.pk %}"><i
+                    class="fa fa-pencil-alt"></i></a>
+              </div>
+            </td>
+          {% endif %}
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  {% endfor %}
+
+  <ul class="pagination justify-content-center">
+    <li class="page-item">
+      <a class="page-link" href="{{ link_previous }}">
+        <span aria-hidden="true">&laquo;</span>
+        <span class="sr-only">Ältere</span>
+      </a>
+    </li>
+    <li class="page-item">
+      <a class="page-link" href="{% url "management:index" %}">Heute</a>
+    </li>
+    <li class="page-item">
+      <a class="page-link" href="{{ link_next }}">
+        <span aria-hidden="true">&raquo;</span>
+        <span class="sr-only">Neuere</span>
+      </a>
+    </li>
+  </ul>
+{% endblock %}

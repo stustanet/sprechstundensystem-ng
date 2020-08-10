@@ -1,0 +1,17 @@
+{% spaceless %}
+{% load tz %}
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//StuStaNet e. V.//Sprechstundensystem//DE
+X-WR-CALNAME:{{ title }}{% for appointment in appointments %}
+
+BEGIN:VEVENT
+UID:{{ appointment.pk }}{% localtime off %}
+DTSTART:{{ appointment.start_time|date:"Ymd\THis\Z" }}
+DTEND:{{ appointment.end_time|date:"Ymd\THis\Z" }}{% endlocaltime %}
+LOCATION:{{ location }}
+SUMMARY:StuStaNet e.V. Sprechstunde - {{ appointment.start_time }} Uhr
+{% if with_attendants %}{% for admin in appointment.admins.all %}ATTENDEE;PARTSTAT=ACCEPTED;CN="{{ admin.name }}":mailto:nobody@stusta.de
+{% endfor %}{% endif %}END:VEVENT{% endfor %}
+END:VCALENDAR
+{% endspaceless %}

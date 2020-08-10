@@ -1,0 +1,15 @@
+Hallo {{ recipient }},
+
+Danke, dass Du Dich für die morgige Sprechstunde ({{ appointment.start_time }}) eingetragen hast!
+
+{{ reminder_note }}
+
+Solltest Du diese Email im Fehler erhalten haben, antworte bitte umgehend.
+
+(Alle folgenden Termine finden sich hier: {% url "management:index" %})
+
+Viel Spaß!
+
+Grüße,
+
+{{ sender }}
