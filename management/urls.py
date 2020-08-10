@@ -27,6 +27,7 @@ urlpatterns = [
 
     # api stuff
     path('persons.json', views.api_list_admins, name='api_list_admins'),
+    path('appointments.json', views.api_list_appointments, name='api_list_appointments'),
 
     # authentication stuff
     path('auth/login/', auth_views.LoginView.as_view(), name='login'),

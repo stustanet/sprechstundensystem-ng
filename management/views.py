@@ -105,7 +105,7 @@ def admin_calendar(request, pk):
     return HttpResponse(content=cal, content_type='text/plain; charset=utf-8')
 
 
-@staff_member_required
+@staff_member_required(login_url=settings.LOGIN_URL)
 def manage_admins(request):
     context = {
         'admins': Admin.objects.all()
@@ -113,7 +113,7 @@ def manage_admins(request):
     return render(request, 'management/manage_admins.html', context)
 
 
-@staff_member_required
+@staff_member_required(login_url=settings.LOGIN_URL)
 def create_admin(request):
     context = {
         'form': AdminForm()
@@ -131,7 +131,7 @@ def create_admin(request):
     return render(request, 'management/edit_admin.html', context)
 
 
-@staff_member_required
+@staff_member_required(login_url=settings.LOGIN_URL)
 def edit_admin(request, pk):
     admin = get_object_or_404(Admin, pk=pk)
     context = {
@@ -151,7 +151,7 @@ def edit_admin(request, pk):
     return render(request, 'management/edit_admin.html', context)
 
 
-@staff_member_required
+@staff_member_required(login_url=settings.LOGIN_URL)
 def edit_appointment(request, pk):
     appointment = get_object_or_404(Appointment, pk=pk)
     context = {
@@ -170,7 +170,7 @@ def edit_appointment(request, pk):
     return render(request, 'management/edit_appointment.html', context)
 
 
-@staff_member_required
+@staff_member_required(login_url=settings.LOGIN_URL)
 def statistics(request):
     today = date.today()
     from_date = request.GET.get('from_date')
@@ -211,7 +211,7 @@ def statistics(request):
     return render(request, 'management/statistics.html', context)
 
 
-@staff_member_required
+@staff_member_required(login_url=settings.LOGIN_URL)
 def app_settings(request):
     context = {
         'settings': [{
@@ -234,7 +234,7 @@ def app_settings(request):
     return render(request, 'management/settings.html', context)
 
 
-@staff_member_required
+@staff_member_required(login_url=settings.LOGIN_URL)
 def api_list_admins(request):
     admins = Admin.objects.all()
 
@@ -244,6 +244,21 @@ def api_list_admins(request):
             'name': admin.name,
             'email': admin.email
         } for admin in admins
+    ]
+
+    return JsonResponse(json_payload, safe=False)
+
+
+def api_list_appointments(request):
+    now = timezone.now()
+    appointments = Appointment.objects.filter(start_time__gte=now)[:2]
+
+    json_payload = [
+        {
+            'start': appointment.start_time.timestamp(),
+            'end': appointment.end_time.timestamp(),
+            'count': appointment.admins.all().count()
+        } for appointment in appointments
     ]
 
     return JsonResponse(json_payload, safe=False)

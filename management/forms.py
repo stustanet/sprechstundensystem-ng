@@ -93,7 +93,7 @@ class AddAppointmentsForm(forms.Form):
         for appointment_time in self.data.getlist('appointments'):
             try:
                 start_time = datetime.fromisoformat(appointment_time)
-                start_time.replace(tzinfo=tz.gettz('Europe/Berlin'))
+                start_time.replace(tzinfo=tz.gettz(settings.TIME_ZONE))
             except ValueError as e:
                 raise forms.ValidationError(str(e))
 

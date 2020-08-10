@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
+from django.urls import reverse_lazy
+
 BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
 
 
@@ -119,8 +121,8 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-LOGIN_URL = '/login'
-LOGIN_REDIRECT_URL = '/'
+LOGIN_URL = reverse_lazy('management:login')
+LOGIN_REDIRECT_URL = reverse_lazy('management:index')
 
 # Mail settings
 EMAIL_HOST = 'mail.stusta.de'

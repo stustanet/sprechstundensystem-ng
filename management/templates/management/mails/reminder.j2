@@ -1,12 +1,12 @@
 Hallo {{ recipient }},
 
-Danke, dass Du Dich für die morgige Sprechstunde ({{ appointment.start_time }}) eingetragen hast!
+Danke, dass Du Dich für die morgige Sprechstunde ({{ appointment.start_time }} - {{ appointment.end_time|date:"H:i" }}) eingetragen hast!
 
 {{ reminder_note }}
 
 Solltest Du diese Email im Fehler erhalten haben, antworte bitte umgehend.
 
-(Alle folgenden Termine finden sich hier: {% url "management:index" %})
+(Alle folgenden Termine finden sich hier: https://sprechstunden.stustanet.de{% url "management:index" %})
 
 Viel Spaß!
 

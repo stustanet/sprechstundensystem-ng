@@ -15,6 +15,7 @@ class Command(BaseCommand):
 
         if not password == password_confirmation:
             self.stdout.write(self.style.ERROR('Passwords did not match'))
+            return
 
         user = User(username=username, email=email, is_staff=True)
         user.set_password(password)
