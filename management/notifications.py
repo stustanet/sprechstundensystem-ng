@@ -83,7 +83,7 @@ def check_for_enough_dates():
 def process_reminders():
     today = timezone.now()
     tomorrow = today + timedelta(days=1, hours=6)  # plus 6 hours for tolerance
-    for appointment in Appointment.objects.all(reminder_sent=False, start_time__gt=today, end_time__lte=tomorrow):
+    for appointment in Appointment.objects.filter(reminder_sent=False, start_time__gt=today, end_time__lte=tomorrow):
         send_understaffed(appointment)
         send_reminders(appointment)
 
