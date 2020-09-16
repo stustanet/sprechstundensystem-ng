@@ -250,8 +250,13 @@ def api_list_admins(request):
 
 
 def api_list_appointments(request):
+    elements = request.GET.get('elements')
+    if elements or not elements.isnumeric():
+        elements = 2
+    else:
+        elements = int(elements)
     now = timezone.now()
-    appointments = Appointment.objects.filter(start_time__gte=now)[:2]
+    appointments = Appointment.objects.filter(start_time__gte=now)[:elements]
 
     json_payload = [
         {
