@@ -251,7 +251,7 @@ def api_list_admins(request):
 
 def api_list_appointments(request):
     elements = request.GET.get('elements')
-    if elements or not elements.isnumeric():
+    if not elements or not elements.isnumeric():
         elements = 2
     else:
         elements = int(elements)
