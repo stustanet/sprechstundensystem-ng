@@ -36,13 +36,16 @@ def plan(request):
     from_date = datetime(year=year, month=month, day=1)
     to_date = datetime_plus_months(from_date, 1)
 
+    previous_date = datetime_plus_months(from_date, -2)
+    next_date = datetime_plus_months(from_date, 2)
+
     context = {
         'from_date': from_date,
         'to_date': to_date,
         'link_previous': reverse(
-            'management:index') + f'?year={year + (from_date.month - 2) // 12}&month={add_months(from_date.month, -2)}',
+            'management:index') + f'?year={previous_date.year}&month={previous_date.month}',
         'link_next': reverse(
-            'management:index') + f'?year={year + (from_date.month + 2) // 12}&month={add_months(from_date.month, 2)}',
+            'management:index') + f'?year={next_date.year}&month={next_date.month}',
         'today': today,
         'plan': [
             {
@@ -88,10 +91,13 @@ def create_appointments(request):
 
     today = date.today()
 
+    def for_month(i):
+        return datetime_plus_months(today, i)
+
     context = {
         'appointments': itertools.chain(*[Appointment.create_for_month(
-            year=today.year + (today.month + i) // 12,
-            month=add_months(today.month, i),
+            year=for_month(i).year,
+            month=for_month(i).month,
         ) for i in range(months)])
     }
 
@@ -168,6 +174,18 @@ def edit_appointment(request, pk):
         context['form'] = form
 
     return render(request, 'management/edit_appointment.html', context)
+
+
+@staff_member_required(login_url=settings.LOGIN_URL)
+def delete_appointment(request, pk):
+    appointment = get_object_or_404(Appointment, pk=pk)
+    admins = appointment.admins
+    if admins.count() is 0:
+        appointment.delete()
+        messages.success(request, f"{appointment} wurde gelöscht")
+    else:
+        messages.error(request, f"{appointment} wurde nicht gelöscht, da schon Admins angemeldet waren")
+    return redirect('management:index')
 
 
 @staff_member_required(login_url=settings.LOGIN_URL)

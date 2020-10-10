@@ -19,6 +19,7 @@ urlpatterns = [
     # appointments
     path('appointments/create', views.create_appointments, name='create_appointments'),
     path('appointments/<int:pk>/edit', views.edit_appointment, name='edit_appointment'),
+    path('appointments/<int:pk>/delete', views.delete_appointment, name='delete_appointment'),
 
     # ical calendar stuff
     path('calendar', views.calendar, name='calendar'),

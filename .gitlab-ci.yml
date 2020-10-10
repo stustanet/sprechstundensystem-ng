@@ -11,11 +11,11 @@ cache:
     - .cache/pip
     - .venv
 
-all_tests:
-  stage: test
-  script:
-    - pip install -r requirements.txt
-    - python3 runtests.py
+#all_tests:
+#  stage: test
+#  script:
+#    - pip install -r requirements.txt
+#    - python3 runtests.py
 
 # PEP8 style conformance
 flake8:

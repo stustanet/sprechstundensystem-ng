@@ -7,19 +7,13 @@ from dateutil.easter import easter
 from django.conf import settings
 
 
+# months go from 1 .. 12 but % and // uses 0 .. 11 so the +1 / -1
 def add_months(month, add):
-    if (month + add) % 12 == 0:
-        return (month + add) % 12 + 1
-
-    return (month + add) % 12
-
-
-def date_plus_months(d: date, months: int):
-    return date(year=d.year + (d.month + months) // 12, month=add_months(d.month, months), day=d.day)
+    return (month + add - 1) % 12 + 1
 
 
 def datetime_plus_months(d: date, months: int):
-    return datetime(year=d.year + (d.month + months) // 12, month=add_months(d.month, months), day=d.day,
+    return datetime(year=d.year + (d.month + months - 1) // 12, month=add_months(d.month, months), day=d.day,
                     tzinfo=tz.gettz(settings.TIME_ZONE))
 
 
