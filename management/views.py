@@ -14,7 +14,7 @@ from django.utils import timezone
 
 from management.forms import AdminForm, AddAppointmentsForm, EditAppointmentForm, SettingsForm
 from management.models import Settings, Appointment, Admin
-from management.utils import add_months, datetime_plus_months
+from management.utils import datetime_plus_months
 
 
 def plan(request):
@@ -180,7 +180,7 @@ def edit_appointment(request, pk):
 def delete_appointment(request, pk):
     appointment = get_object_or_404(Appointment, pk=pk)
     admins = appointment.admins
-    if admins.count() is 0:
+    if admins.count() == 0:
         appointment.delete()
         messages.success(request, f"{appointment} wurde gelöscht")
     else:
