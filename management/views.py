@@ -76,11 +76,11 @@ def full_calendar(request):
     return HttpResponse(content=cal, content_type='text/plain')
 
 
-@staff_member_required
+@staff_member_required(login_url=settings.LOGIN_URL)
 def create_appointments(request):
     months = request.GET.get('months')
     if not months or not months.isnumeric():
-        months = 2
+        months = 3
     else:
         months = max(1, int(months))
 
@@ -104,7 +104,7 @@ def create_appointments(request):
     return render(request, 'management/create_appointments.html', context)
 
 
-@staff_member_required
+@staff_member_required(login_url=settings.LOGIN_URL)
 def admin_calendar(request, pk):
     admin = get_object_or_404(Admin, pk=pk)
     cal = Appointment.as_ical(admin.appointments.all(), title=f'Sprechstunden von {admin.name}', with_attendants=True)
