@@ -156,6 +156,7 @@ def edit_admin(request, pk):
 
     return render(request, 'management/edit_admin.html', context)
 
+
 @staff_member_required(login_url=settings.LOGIN_URL)
 def delete_admin(request, pk):
     admin = get_object_or_404(Admin, pk=pk)

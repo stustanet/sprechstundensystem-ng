@@ -186,8 +186,7 @@ class AdminForm(forms.ModelForm):
             # remove last "" entry
             hdates = hdates[:-1]
             hsemesters = hsemesters[:-1]
-        
-        
+
         to_remove = {i.pk for i in self.instance.h_semesters.all()}
         to_save = []
         for hdate_str, hsem_pk_str in zip(hdates, hsemesters):
@@ -210,7 +209,6 @@ class AdminForm(forms.ModelForm):
                 to_save.append(HSemester(date=hdate, admin=self.instance))
         self.cleaned_data["dates_to_save"] = to_save
         self.cleaned_data["dates_to_remove"] = to_remove
-
 
     def clean(self):
         self.clean_date()
