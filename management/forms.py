@@ -1,11 +1,12 @@
 from datetime import datetime, timedelta
+import datetime
 from typing import Optional
 
 from dateutil import tz
 from django import forms
 from django.conf import settings
 
-from management.models import Admin, Appointment, Settings
+from management.models import Admin, Appointment, HSemester, Settings
 
 
 class SettingsForm(forms.Form):
@@ -175,3 +176,51 @@ class AdminForm(forms.ModelForm):
     class Meta:
         model = Admin
         fields = ('first_name', 'last_name', 'email')
+
+    def clean_date(self):
+        hdates = self.data.getlist('date', [])
+        hsemesters = self.data.getlist('hsems', [])
+        if len(hdates) != len(hsemesters):
+            raise forms.ValidationError('date and hsems field must have the same length.')
+        if hdates[-1] == "":
+            # remove last "" entry
+            hdates = hdates[:-1]
+            hsemesters = hsemesters[:-1]
+
+        to_remove = {i.pk for i in self.instance.h_semesters.all()}
+        to_save = []
+        for hdate_str, hsem_pk_str in zip(hdates, hsemesters):
+            try:
+                # check that date has correct format
+                hdate = datetime.date.fromisoformat(hdate_str)
+            except ValueError:
+                raise forms.ValidationError('Wrong date format.')
+            # check that pk actually matches the admin
+            if hsem_pk_str != "":
+                hsem_pk = int(hsem_pk_str)
+                if hsem_pk not in [i.pk for i in self.instance.h_semesters.all()]:
+                    raise forms.ValidationError('Honorary semester does not belong to admin.')
+
+                hs = HSemester.objects.filter(pk=hsem_pk).first()
+                hs.date = hdate
+                to_save.append(hs)
+                to_remove -= {hs.pk}
+            else:
+                to_save.append(HSemester(date=hdate, admin=self.instance))
+        self.cleaned_data["dates_to_save"] = to_save
+        self.cleaned_data["dates_to_remove"] = to_remove
+
+    def clean(self):
+        self.clean_date()
+        return self.cleaned_data
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        if commit:
+            for i in self.cleaned_data["dates_to_save"]:
+                i.save()
+            for hsem_pk in self.cleaned_data["dates_to_remove"]:
+                HSemester.objects.filter(pk=hsem_pk).delete()
+            instance.save()
+
+        return instance
