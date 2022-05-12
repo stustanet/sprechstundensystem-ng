@@ -156,6 +156,13 @@ def edit_admin(request, pk):
 
     return render(request, 'management/edit_admin.html', context)
 
+@staff_member_required(login_url=settings.LOGIN_URL)
+def delete_admin(request, pk):
+    admin = get_object_or_404(Admin, pk=pk)
+    admin.delete()
+    messages.success(request, f"{admin} wurde gelöscht")
+    return redirect('management:manage_admins')
+
 
 @staff_member_required(login_url=settings.LOGIN_URL)
 def edit_appointment(request, pk):
@@ -218,6 +225,7 @@ def statistics(request):
         filter=Q(appointments__start_time__gte=from_datetime, appointments__end_time__lte=to_datetime)
     )
 
+    # wanted that appointments with one are not shown?
     admins = Admin.objects.annotate(num_appointments=count_query).filter(num_appointments__gte=1).order_by(
         '-num_appointments')
 
