@@ -218,7 +218,7 @@ def statistics(request):
         filter=Q(appointments__start_time__gte=from_datetime, appointments__end_time__lte=to_datetime)
     )
 
-    admins = Admin.objects.annotate(num_appointments=count_query).filter(num_appointments__gt=1).order_by(
+    admins = Admin.objects.annotate(num_appointments=count_query).filter(num_appointments__gte=1).order_by(
         '-num_appointments')
 
     context = {
