@@ -53,7 +53,7 @@
     <div class="row justify-content-end">
       <div class="col-sm-9">
         <button type="submit" class="btn btn-success">Speichern</button>
-        <a class="btn btn-danger" href="{% url "management:delete_appointment" appointment.pk  %}">Löschen</a>
+        <a class="btn btn-danger delete" href="{% url "management:delete_appointment" appointment.pk  %}">Löschen</a>
         <a class="btn btn-outline-dark" href="{% url "management:index" %}">Abbrechen</a>
       </div>
     </div>
@@ -161,7 +161,7 @@
               return __(personInput).txt;
           };
 
-          $('button[name=delete]').click(function () {
+          $('.delete').click(function () {
               return window.confirm("Soll die Sprechstunde gelöscht werden?");
           });
 
