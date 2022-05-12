@@ -15,6 +15,7 @@ urlpatterns = [
     path('admins/<int:pk>/edit', views.edit_admin, name='edit_admin'),
     path('admins/<int:pk>/appointments.ical', views.admin_calendar, name='admin_calendar'),
     path('admins/create', views.create_admin, name='create_admin'),
+    path('admins/<int:pk>/delete', views.delete_admin, name='delete_admin'),
 
     # appointments
     path('appointments/create', views.create_appointments, name='create_appointments'),
