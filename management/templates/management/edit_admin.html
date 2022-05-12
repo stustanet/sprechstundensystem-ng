@@ -1,4 +1,5 @@
 {% extends "management/base.html" %}
+{% load static %}
 
 {% block content %}
   <h3>{% if admin %}Admin bearbeiten{% else %}Admin hinzufügen{% endif %}</h3>
@@ -37,10 +38,119 @@
               name="{{ form.email.name }}">
           {{ form.email.errors }}
         </div>
+      <div id="hsem-template" class="row mb-3 d-none">
+        <div class="col-sm-11">
+          <!-- <input class="form-control typeahead" type="text" autocomplete="off"> -->
+          <input class="form-control" type="date">
+          <input type="hidden">
+        </div>
+        <button class="col-sm-1 btn btn-danger delete-hsem" type="button"><i class="fa fa-trash"></i></button>
+      </div>
+      <div class="form-group row">
+        <label class="col-sm-3 col-form-label">Honorarsemester</label>
+        <div class="col-sm-9 hsems">
+          {% for hs in admin.h_semesters.all %}
+            <div class="row mb-3">
+              <div class="col-sm-11">
+                <input id="id_start_date" class="form-control" type="date" name="date"
+                 value="{{ hs.date|date:"Y-m-d" }}">
+                <input type="hidden" name="hsems" value="{{ hs.pk }}">
+              </div>
+              <button class="col-sm-1 btn btn-danger delete-hsem" type="button"><i class="fa fa-trash"></i></button>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+      {{ form.date.errors }}
         <hr>
         <button type="submit" class="btn btn-success">Speichern</button>
-        <a class="btn btn-outline-danger" href="{% url "management:manage_admins" %}">Abrechen</a>
+        <a class="btn btn-outline-danger" href="{% url "management:manage_admins" %}">Abbrechen</a>
       </fieldset>
     </form>
   </div>
+{% endblock %}
+
+
+{% block footer_scripts %}
+  <script src="{% static "management/typeahead.js/typeahead.bundle.min.js" %}"
+          type="text/javascript"></script>
+  <script type="text/javascript">
+      $(function () {
+          const template = $('#hsem-template');
+          const container = $('.hsems');
+          let items = [];
+          let selected = [];
+          let map = {};
+
+          const removeFunction = function () {
+
+              const id = parseInt($(this).parent().find('input[type=hidden]').val(), 10);
+
+              if (!isNaN(id)) {
+                  const selectedId = selected.indexOf(id);
+
+                  selected.splice(selectedId, 1);
+              }
+
+              if ($(this).closest('div.row').is(':last-child')) return false;
+              $(this).closest('div.row').remove();
+
+          };
+
+          const __ = function (template) {
+              template = $(template);
+
+              if (typeof (template[0].__cache) !== 'undefined') return template[0].__cache;
+
+              const obj = {
+                  txt: template.find('input[type=date]'),
+                  del: template.find('button.delete-hsem'),
+                  hid: template.find('input[type=hidden]')
+              };
+
+              template[0].__cache = obj;
+
+              return obj;
+          }
+
+
+          const addDateBoxAhead = function (elem) {
+              const curr = __(elem);
+
+              curr.txt.bind('change', function (event, suggestion) {
+
+                  const nextField = curr.txt.closest('.row').next();
+
+                  if (nextField.length === 0) {
+                      addNewHSemField().focus();
+                  } else {
+                      __(nextField).txt.focus();
+                  }
+              });
+          };
+
+          const addNewHSemField = function () {
+
+              const personInput = template.clone(false);
+
+              __(personInput).del.click(removeFunction);
+              __(personInput).txt[0].name = 'date';
+              __(personInput).hid[0].name = 'hsems';
+              personInput.removeAttr('id').removeClass('d-none').appendTo(container);
+
+              addDateBoxAhead(personInput);
+              __(personInput).txt.focus();
+
+              return __(personInput).txt;
+          };
+
+          $('button.delete-hsem').click(removeFunction);
+
+          $('.persons button.delete-hsem').closest('.row').each(function (i, elem) {
+              selected.push(__(elem).hid.val() * 1);
+          });
+
+          addNewHSemField();
+      });
+  </script>
 {% endblock %}
