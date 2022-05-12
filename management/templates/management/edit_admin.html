@@ -15,9 +15,7 @@
               id="id_first_name"
               {% if form.first_name.value %}value="{{ form.first_name.value }}"{% endif %}
               name="{{ form.first_name.name }}">
-          {% if form.first_name.errors %}
-            <div class="invalid-feedback">{{ form.first_name.errors }}</div>
-          {% endif %}
+          {{ form.first_name.errors }}
         </div>
         <div class="form-group row">
           <label for="id_last_name" class="col-sm-3">Nachname</label>
@@ -27,9 +25,7 @@
               id="id_last_name"
               {% if form.last_name.value %}value="{{ form.last_name.value }}"{% endif %}
               name="{{ form.last_name.name }}">
-          {% if form.last_name.errors %}
-            <div class="invalid-feedback">{{ form.last_name.errors }}</div>
-          {% endif %}
+          {{ form.last_name.errors }}
         </div>
         <div class="form-group row">
           <label for="id_email" class="col-sm-3">E-Mail</label>
@@ -39,9 +35,7 @@
               id="id_email"
               {% if form.email.value %}value="{{ form.email.value }}"{% endif %}
               name="{{ form.email.name }}">
-          {% if form.email.errors %}
-            <div class="invalid-feedback">{{ form.email.errors }}</div>
-          {% endif %}
+          {{ form.email.errors }}
         </div>
         <hr>
         <button type="submit" class="btn btn-success">Speichern</button>
