@@ -1,5 +1,4 @@
-from datetime import datetime, timedelta
-import datetime
+from datetime import datetime, timedelta, date as fdate
 from typing import Optional
 
 from dateutil import tz
@@ -192,7 +191,7 @@ class AdminForm(forms.ModelForm):
         for hdate_str, hsem_pk_str in zip(hdates, hsemesters):
             try:
                 # check that date has correct format
-                hdate = datetime.date.fromisoformat(hdate_str)
+                hdate = fdate.fromisoformat(hdate_str)
             except ValueError:
                 raise forms.ValidationError('Wrong date format.')
             # check that pk actually matches the admin
