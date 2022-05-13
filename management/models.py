@@ -31,6 +31,9 @@ class Admin(models.Model):
     def ical_link(self):
         return reverse('management:admin_calendar', kwargs={'pk': self.pk})
 
+    def appointment_count(self):
+        return self.appointments.count()
+
     def h_semester_count(self, end_date=None):
         if not end_date:
         return self.h_semesters.count()

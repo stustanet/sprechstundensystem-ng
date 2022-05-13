@@ -115,7 +115,7 @@ def admin_calendar(request, pk):
 @staff_member_required(login_url=settings.LOGIN_URL)
 def manage_admins(request):
     context = {
-        'admins': Admin.objects.all()
+        'admins': Admin.objects.order_by('last_name')
     }
     return render(request, 'management/manage_admins.html', context)
 
