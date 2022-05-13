@@ -6,3 +6,4 @@ from management import models
 admin.site.register(models.Settings)
 admin.site.register(models.Admin)
 admin.site.register(models.Appointment)
+admin.site.register(models.HSemester)
