@@ -31,20 +31,29 @@ class Admin(models.Model):
     def ical_link(self):
         return reverse('management:admin_calendar', kwargs={'pk': self.pk})
 
-    @property
-    def h_semester_count(self):
-        return self.h_semesters.count()
+    def appointment_count(self):
+        return self.appointments.count()
 
-    @property
-    def ss_since_last_h_semester(self):
-        if self.h_semesters.count() == 0:
-            return 0
-        last_h_semester_date = self.h_semesters.order_by("-date").first().date
+    def h_semester_count(self, end_date=None):
+        if not end_date:
+        return self.h_semesters.count()
+        else:
+            return self.h_semesters.filter(date__lte=end_date).count()
+
+    def ss_since_last_h_semester(self, end_date=None):
+        if not end_date:
+            end_date = datetime.max.date()
+        if self.h_semesters.filter(date__lte=end_date).count() == 0:
+            last_h_semester_date = datetime.min.date()
+        else:
+            last_h_semester_date = self.h_semesters.filter(date__lte=end_date).order_by("-date").first().date
         # use maxtime here as the sprechstunde on the same day as the honorary semester
         # is awarded counts to this very honorary semester
         last_h_semester_datetime = datetime.combine(
             last_h_semester_date, datetime.max.time(), tzinfo=tz.gettz(settings.TIME_ZONE))
-        return self.appointments.filter(start_time__gte=last_h_semester_datetime).count()
+        end_datetime = datetime.combine(
+            end_date, datetime.max.time(), tzinfo=tz.gettz(settings.TIME_ZONE))
+        return self.appointments.filter(start_time__gte=last_h_semester_datetime, start_time__lte=end_datetime).count()
 
 
 class HSemester(models.Model):

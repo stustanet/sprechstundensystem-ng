@@ -15,6 +15,7 @@ from django.utils import timezone
 from management.forms import AdminForm, AddAppointmentsForm, EditAppointmentForm, SettingsForm
 from management.models import Settings, Appointment, Admin
 from management.utils import datetime_plus_months
+from django.utils.timezone import now
 
 
 def plan(request):
@@ -114,7 +115,7 @@ def admin_calendar(request, pk):
 @staff_member_required(login_url=settings.LOGIN_URL)
 def manage_admins(request):
     context = {
-        'admins': Admin.objects.all()
+        'admins': Admin.objects.order_by('last_name')
     }
     return render(request, 'management/manage_admins.html', context)
 
@@ -142,6 +143,7 @@ def edit_admin(request, pk):
     admin = get_object_or_404(Admin, pk=pk)
     context = {
         'admin': admin,
+        'hsems': admin.h_semesters.order_by("date"),
         'form': AdminForm(instance=admin)
     }
 
@@ -198,16 +200,6 @@ def delete_appointment(request, pk):
 
 @staff_member_required(login_url=settings.LOGIN_URL)
 def statistics(request):
-    today = date.today()
-    from_date = request.GET.get('from_date')
-    if from_date:
-        try:
-            from_date = date.fromisoformat(from_date)
-        except ValueError:
-            from_date = None
-
-    if not from_date:
-        from_date = today - relativedelta(months=3)
     to_date = request.GET.get('to_date')
     if to_date:
         try:
@@ -216,22 +208,26 @@ def statistics(request):
             to_date = None
 
     if not to_date:
-        to_date = today + relativedelta(months=3)
-
-    from_datetime = datetime.combine(from_date, datetime.min.time(), tzinfo=tz.gettz(settings.TIME_ZONE))
-    to_datetime = datetime.combine(to_date, datetime.min.time(), tzinfo=tz.gettz(settings.TIME_ZONE))
+        # take datetime now to avoid showing a sprechstunde that has not happen yet
+        to_datetime = now()
+        to_date = date.today()
+    else:
+        # max time in order to include the sprechstunde that happened on that day
+        to_datetime = datetime.combine(to_date, datetime.max.time(), tzinfo=tz.gettz(settings.TIME_ZONE))
 
     count_query = Count(
         'appointments',
-        filter=Q(appointments__start_time__gte=from_datetime, appointments__end_time__lte=to_datetime)
+        filter=Q(appointments__end_time__lte=to_datetime)
     )
 
-    # wanted that appointments with one are not shown?
     admins = Admin.objects.annotate(num_appointments=count_query).filter(num_appointments__gte=1).order_by(
         '-num_appointments')
 
+    for admin in admins:
+        admin.h_sem_count = admin.h_semester_count(to_date)
+        admin.ss_since_last_h_sem = admin.ss_since_last_h_semester(to_date)
+
     context = {
-        'from_date': from_date,
         'to_date': to_date,
         'admins': admins
     }
