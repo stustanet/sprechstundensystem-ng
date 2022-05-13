@@ -4,10 +4,7 @@
   <h3>Statistik</h3>
   <form action="{% url "management:statistics" %}" method="get">
     <div class="form-group row">
-      <label class="col-sm-2 col-form-label">Zeitraum</label>
-      <div class="col-sm-4">
-        <input class="form-control" type="date" name="from_date" value="{{ from_date|date:"Y-m-d" }}">
-      </div>
+      <label class="col-sm-2 col-form-label">Sprechstunden bis</label>
       <div class="col-sm-4">
         <input class="form-control" type="date" name="to_date" value="{{ to_date|date:"Y-m-d" }}">
       </div>
@@ -34,8 +31,8 @@
             <a href="mailto:{{ admin.email }}"><i class="fa fa-envelope"></i></a>
           </td>
           <td>{{ admin.num_appointments }}</td>
-          <td>{{ admin.h_semester_count }}</td>
-          <td>{{ admin.ss_since_last_h_semester }}</td>
+          <td>{{ admin.h_sem_count }}</td>
+          <td>{{ admin.ss_since_last_h_sem }}</td>
         </tr>
       {% endfor %}
       </tbody>
