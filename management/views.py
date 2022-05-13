@@ -143,6 +143,7 @@ def edit_admin(request, pk):
     admin = get_object_or_404(Admin, pk=pk)
     context = {
         'admin': admin,
+        'hsems': admin.h_semesters.order_by("date"),
         'form': AdminForm(instance=admin)
     }
 
