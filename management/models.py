@@ -11,7 +11,6 @@ from django.urls import reverse
 from django.utils import formats
 
 from management.utils import is_holiday, is_during_lecture_time
-from django.utils.timezone import make_aware
 
 
 class Admin(models.Model):
@@ -43,8 +42,9 @@ class Admin(models.Model):
         last_h_semester_date = self.h_semesters.order_by("-date").first().date
         # use maxtime here as the sprechstunde on the same day as the honorary semester
         # is awarded counts to this very honorary semester
-        last_h_semester_datetime = datetime.combine(last_h_semester_date, datetime.max.time())
-        return self.appointments.filter(start_time__gte=make_aware(last_h_semester_datetime)).count()
+        last_h_semester_datetime = datetime.combine(
+            last_h_semester_date, datetime.max.time(), tzinfo=tz.gettz(settings.TIME_ZONE))
+        return self.appointments.filter(start_time__gte=last_h_semester_datetime).count()
 
 
 class HSemester(models.Model):

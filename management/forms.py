@@ -47,7 +47,7 @@ class SettingsForm(forms.Form):
             self.cleaned_data['active'] = int(self.data['active'])
 
             for setting in self.settings:
-                if not str(setting.pk) in self.data:
+                if str(setting.pk) not in self.data:
                     raise forms.ValidationError(f'missing setting with id {setting.pk}')
 
                 setting.value = self.data[str(setting.pk)]
@@ -192,8 +192,8 @@ class AdminForm(forms.ModelForm):
             try:
                 # check that date has correct format
                 hdate = fdate.fromisoformat(hdate_str)
-            except ValueError:
-                raise forms.ValidationError('Wrong date format.')
+            except ValueError as ve:
+                raise forms.ValidationError('Wrong date format.') from ve
             # check that pk actually matches the admin
             if hsem_pk_str != "":
                 hsem_pk = int(hsem_pk_str)
