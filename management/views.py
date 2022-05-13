@@ -1,7 +1,6 @@
 import itertools
 from datetime import date, datetime
 
-from dateutil.relativedelta import relativedelta
 from dateutil.tz import tz
 from django.conf import settings
 from django.contrib import messages

@@ -36,7 +36,7 @@ class Admin(models.Model):
 
     def h_semester_count(self, end_date=None):
         if not end_date:
-        return self.h_semesters.count()
+            return self.h_semesters.count()
         else:
             return self.h_semesters.filter(date__lte=end_date).count()
 
