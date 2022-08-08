@@ -40,7 +40,6 @@
         </div>
       <div id="hsem-template" class="row mb-3 d-none">
         <div class="col-sm-11">
-          <!-- <input class="form-control typeahead" type="text" autocomplete="off"> -->
           <input class="form-control" type="date">
           <input type="hidden">
         </div>
@@ -72,15 +71,11 @@
 
 
 {% block footer_scripts %}
-  <script src="{% static "management/typeahead.js/typeahead.bundle.min.js" %}"
-          type="text/javascript"></script>
   <script type="text/javascript">
       $(function () {
           const template = $('#hsem-template');
           const container = $('.hsems');
-          let items = [];
           let selected = [];
-          let map = {};
 
           const removeFunction = function () {
 
@@ -98,6 +93,7 @@
           };
 
           const __ = function (template) {
+              //find the form fields and elements for the current hs template
               template = $(template);
 
               if (typeof (template[0].__cache) !== 'undefined') return template[0].__cache;
@@ -113,35 +109,45 @@
               return obj;
           }
 
-
-          const addDateBoxAhead = function (elem) {
-              const curr = __(elem);
-
-              curr.txt.bind('change', function (event, suggestion) {
-
-                  const nextField = curr.txt.closest('.row').next();
+          const addNextFieldHandler = function (pInputFields) {
+              const dateField = pInputFields.txt;
+              const addField = e => {
+                  if (dateField[0].value === '') //invalid date
+                      return;
+                  const nextField = dateField.closest('.row').next();
 
                   if (nextField.length === 0) {
                       addNewHSemField().focus();
                   } else {
                       __(nextField).txt.focus();
                   }
+              }
+
+              //listen on date change for datepicker
+              dateField.change(addField);
+              //when the keyboard is used, remove change event as it is fired on the first valid date.
+              //if typing 01-01-2014 the date would be 01-01-0002 as the date is valid as soon as 2 is typed
+              //with keyboard typing listen to the blur event
+              dateField.keypress( e => {
+                  dateField.off('change blur');
+                  dateField.blur(addField);
+                  if (e.keyCode === 13) addField();
               });
-          };
+          }
 
           const addNewHSemField = function () {
-
               const personInput = template.clone(false);
+              const pInputFields = __(personInput);
 
-              __(personInput).del.click(removeFunction);
-              __(personInput).txt[0].name = 'date';
-              __(personInput).hid[0].name = 'hsems';
+              pInputFields.del.click(removeFunction);
+              pInputFields.txt[0].name = 'date';
+              pInputFields.hid[0].name = 'hsems';
+              addNextFieldHandler(pInputFields);
+
               personInput.removeAttr('id').removeClass('d-none').appendTo(container);
+              pInputFields.txt.focus();
 
-              addDateBoxAhead(personInput);
-              __(personInput).txt.focus();
-
-              return __(personInput).txt;
+              return pInputFields.txt;
           };
 
           $('button.delete-hsem').click(removeFunction);
