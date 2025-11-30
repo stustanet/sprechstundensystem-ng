@@ -53,6 +53,11 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://sprechstunden.stustanet.de',
+]
+
 ROOT_URLCONF = 'sprechstundensystem.urls'
 
 TEMPLATES = [
